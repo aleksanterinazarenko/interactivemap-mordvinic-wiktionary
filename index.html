@@ -85,7 +85,7 @@
 
         const coordinates = {
             "Moksha": { lat: 54.320567, lng: 43.341170 },
-            "Erzya": { lat: 54.701667, lng: 45.908333 },
+            "Erzya": { lat: 54.18671, lng: 45.18383 },
             "Russian": { lat: 55.7558, lng: 37.6173 },
             "Finnish": { lat: 63.2467777, lng: 25.9209164 },
             "Hungarian": { lat: 47.1817585, lng: 19.5060937 }
@@ -151,7 +151,6 @@
                 const bounds = L.latLngBounds();
 
                 const labels = [
-                    { name: "Moksha", value: selectedRow.moksha },
                     { name: "Erzya", value: selectedRow.erzya },
                     { name: "Russian", value: selectedRow.russian },
                     { name: "Finnish", value: selectedRow.finnish },
@@ -167,9 +166,27 @@
             iconSize: [100, 30]
         });
 
+        if (label.name === "Erzya") {
+                    const mokshaValue = selectedRow.moksha;
+                    customLabel = L.divIcon({
+                        className: 'custom-label',
+                        html: `${label.value}<br>${mokshaValue}`,
+                        iconSize: [100, 50]
+                    });
+                } else {
+                    customLabel = L.divIcon({
+                        className: 'custom-label',
+                        html: label.value,
+                        iconSize: [100, 30]
+                    });
+                }
+
         var marker = L.marker([coord.lat, coord.lng], { icon: customLabel }).addTo(map);
 
         marker.bindPopup(`<strong>${label.name}</strong>`);
+        if (label.name === "Erzya") {
+            marker.bindPopup(`<strong>Erzya</strong><br><strong>Moksha</strong>`);
+        }
 
         bounds.extend(marker.getLatLng());
     }
