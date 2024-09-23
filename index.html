@@ -56,6 +56,11 @@
             border-radius: 3px;
             white-space: nowrap;
         }
+
+        .leaflet-popup-content {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -70,7 +75,7 @@
     <div id="map"></div>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
-        var map = L.map('map').setView([53.0, 39.0], 7);
+        var map = L.map('map');
 
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a>',
@@ -82,8 +87,8 @@
             "Moksha": { lat: 54.320567, lng: 43.341170 },
             "Erzya": { lat: 54.701667, lng: 45.908333 },
             "Russian": { lat: 55.7558, lng: 37.6173 },
-            "Finnish": { lat: 60.1695, lng: 24.9354 },
-            "Hungarian": { lat: 47.1625, lng: 19.5033 }
+            "Finnish": { lat: 63.2467777, lng: 25.9209164 },
+            "Hungarian": { lat: 47.1817585, lng: 19.5060937 }
         };
 
         const apiUrl = 'https://en.wiktionary.org/w/api.php?action=parse&page=Appendix:Mordvinic_word_lists_(edited)&prop=text&format=json&origin=*';
@@ -154,22 +159,22 @@
                 ];
 
                 labels.forEach(function (label) {
-                    var coord = coordinates[label.name];
-                    if (coord && label.value) {
-                        var customLabel = L.divIcon({
-                            className: 'custom-label',
-                            html: label.value,
-                            iconSize: [100, 30]
-                        });
+    var coord = coordinates[label.name];
+    if (coord && label.value) {
+        var customLabel = L.divIcon({
+            className: 'custom-label',
+            html: label.value,
+            iconSize: [100, 30]
+        });
 
-                        var marker = L.marker([coord.lat, coord.lng], { icon: customLabel }).addTo(map);
-                        marker.on('click', function() {
-                            alert(label.name);
-                        });
+        var marker = L.marker([coord.lat, coord.lng], { icon: customLabel }).addTo(map);
 
-                        bounds.extend(marker.getLatLng());
-                    }
-                });
+        marker.bindPopup(`<strong>${label.name}</strong>`);
+
+        bounds.extend(marker.getLatLng());
+    }
+});
+
 
                 if (!bounds.isValid()) {
                     console.warn("No valid bounds to fit on the map.");
