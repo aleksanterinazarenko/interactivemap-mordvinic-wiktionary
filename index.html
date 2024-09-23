@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Interactive Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        #map {
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        #wordSelector {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            font-size: 16px;
+            padding: 10px;
+            margin: 10px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            z-index: 1000;
+        }
+        .custom-label {
+            display: flex;
+            align-items: center;
+            justify-content: center; 
+            padding: 0;
+            text-align: center;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            font-size: 16px;
+            color: black;
+            width: fit-content;
+            height: fit-content;
+            border-radius: 3px;
+            white-space: nowrap;
+        }
+        .leaflet-popup-content {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <select id="wordSelector"></select>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        var map = L.map('map').setView([54.5, 43.0], 7);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        const coordinates = {
+            "1": { lat: 54.320567, lng: 43.341170 }, // Moksha Lit
+            "2": { lat: 54.701667, lng: 45.908333 }, // Erzya Lit
+            "3": { lat: 55.7558, lng: 37.6173 },     // Russian
+            "4": { lat: 60.1695, lng: 24.9354 },     // Finnish
+            "5": { lat: 47.1625, lng: 19.5033 }      // Hungarian
+        };
+
+        function fetchData() {
+            fetch('https://en.wiktionary.org/wiki/Appendix:Mordvinic_word_lists_(edited)')
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const rows = doc.querySelectorAll('table.wikitable tbody tr');
+
+                    const wordsData = [];
+                    rows.forEach(row => {
+                        const cells = row.querySelectorAll('td');
+                        if (cells.length > 0) {
+                            wordsData.push({
+                                english: cells[0].textContent.trim(),
+                                russian: cells[1] ? cells[1].textContent.trim() : '',
+                                finnish: cells[2] ? cells[2].textContent.trim() : '',
+                                erzya: cells[3] ? cells[3].textContent.trim() : '',
+                                moksha: cells[4] ? cells[4].textContent.trim() : '',
+                                hungarian: cells[5] ? cells[5].textContent.trim() : ''
+                            });
+                        }
+                    });
+
+                    populateDropdown(wordsData);
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
+
+        function populateDropdown(wordsData) {
+            const wordSelector = document.getElementById('wordSelector');
+            wordsData.forEach(row => {
+                let option = document.createElement('option');
+                option.value = row.english;
+                option.textContent = row.english;
+                wordSelector.appendChild(option);
+            });
+
+            const firstWord = wordsData[0].english;
+            wordSelector.value = firstWord;
+            updateLabels(firstWord, wordsData);
+        }
+
+        function updateLabels(selectedWord, wordsData) {
+            map.eachLayer(function (layer) {
+                if (layer instanceof L.Marker) {
+                    map.removeLayer(layer);
+                }
+            });
+
+            var bounds = L.latLngBounds([]);
+            const selectedRow = wordsData.find(row => row.english === selectedWord);
+            if (selectedRow) {
+                const labels = [
+                    { name: "Moksha Lit", value: selectedRow.moksha },
+                    { name: "Erzya Lit", value: selectedRow.erzya },
+                    { name: "Russian", value: selectedRow.russian },
+                    { name: "Finnish", value: selectedRow.finnish },
+                    { name: "Hungarian", value: selectedRow.hungarian }
+                ];
+
+                labels.forEach(function (label, index) {
+                    var coord = coordinates[String(index + 1)];
+                    if (coord && label.value) {
+                        var marker = L.marker([coord.lat, coord.lng], {
+                            icon: L.divIcon({
+                                className: 'custom-label',
+                                html: label.value,
+                                iconSize: [100, 50]
+                            }),
+                            popupAnchor: [0, -20]
+                        }).addTo(map);
+
+                        marker.bindPopup(`<strong>${label.name}</strong>`);
+                        bounds.extend(marker.getLatLng());
+                    }
+                });
+
+                map.fitBounds(bounds, { padding: [50, 50] });
+            }
+        }
+
+        document.getElementById('wordSelector').addEventListener('change', function (e) {
+            var selectedWord = e.target.value;
+            updateLabels(selectedWord, window.wordsData);
+        });
+
+        fetchData();
+
+        window.addEventListener('resize', function() {
+            map.invalidateSize();
+        });
+    </script>
+</body>
+</html>
