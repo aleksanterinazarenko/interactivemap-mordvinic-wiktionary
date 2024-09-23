@@ -109,6 +109,7 @@
         }
 
         function updateLabels(selectedWord, wordsData) {
+            // Usunięcie istniejących markerów
             map.eachLayer(function (layer) {
                 if (layer instanceof L.Marker) {
                     map.removeLayer(layer);
@@ -143,7 +144,11 @@
                     }
                 });
 
-                map.fitBounds(bounds, { padding: [50, 50] });
+                if (!bounds.isValid()) {
+                    console.warn("No valid bounds to fit on the map.");
+                } else {
+                    map.fitBounds(bounds, { padding: [50, 50] });
+                }
             }
         }
 
