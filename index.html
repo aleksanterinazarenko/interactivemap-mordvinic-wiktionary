@@ -59,11 +59,11 @@
         }).addTo(map);
 
         const coordinates = {
-            "1": { lat: 54.320567, lng: 43.341170 }, // Moksha Lit
-            "2": { lat: 54.701667, lng: 45.908333 }, // Erzya Lit
-            "3": { lat: 55.7558, lng: 37.6173 },     // Russian
-            "4": { lat: 60.1695, lng: 24.9354 },     // Finnish
-            "5": { lat: 47.1625, lng: 19.5033 }      // Hungarian
+            "Moksha": { lat: 54.320567, lng: 43.341170 },
+            "Erzya": { lat: 54.701667, lng: 45.908333 },
+            "Russian": { lat: 55.7558, lng: 37.6173 },
+            "Finnish": { lat: 60.1695, lng: 24.9354 },
+            "Hungarian": { lat: 47.1625, lng: 19.5033 }
         };
 
         function fetchData() {
@@ -79,16 +79,17 @@
                         const cells = row.querySelectorAll('td');
                         if (cells.length > 0) {
                             wordsData.push({
-                                english: cells[1].textContent.trim(), // English
-                                russian: cells[2] ? cells[2].textContent.trim() : '', // Russian
-                                finnish: cells[3] ? cells[3].textContent.trim() : '', // Finnish
-                                erzya: cells[4] ? cells[4].textContent.trim() : '', // Erzya
-                                moksha: cells[5] ? cells[5].textContent.trim() : '', // Moksha
-                                hungarian: cells[6] ? cells[6].textContent.trim() : '' // Hungarian
+                                english: cells[1].textContent.trim(),
+                                russian: cells[2] ? cells[2].textContent.trim() : '',
+                                finnish: cells[3] ? cells[3].textContent.trim() : '',
+                                erzya: cells[4] ? cells[4].textContent.trim() : '',
+                                moksha: cells[5] ? cells[5].textContent.trim() : '',
+                                hungarian: cells[6] ? cells[6].textContent.trim() : ''
                             });
                         }
                     });
 
+                    console.log(wordsData); // Log the fetched data
                     populateDropdown(wordsData);
                 })
                 .catch(error => console.error('Error fetching data:', error));
@@ -119,15 +120,15 @@
             const selectedRow = wordsData.find(row => row.english === selectedWord);
             if (selectedRow) {
                 const labels = [
-                    { name: "Moksha Lit", value: selectedRow.moksha },
-                    { name: "Erzya Lit", value: selectedRow.erzya },
+                    { name: "Moksha", value: selectedRow.moksha },
+                    { name: "Erzya", value: selectedRow.erzya },
                     { name: "Russian", value: selectedRow.russian },
                     { name: "Finnish", value: selectedRow.finnish },
                     { name: "Hungarian", value: selectedRow.hungarian }
                 ];
 
-                labels.forEach(function (label, index) {
-                    var coord = coordinates[String(index + 1)];
+                labels.forEach(function (label) {
+                    var coord = coordinates[label.name];
                     if (coord && label.value) {
                         var marker = L.marker([coord.lat, coord.lng], {
                             icon: L.divIcon({
