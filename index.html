@@ -59,6 +59,7 @@
 
         .leaflet-popup-content {
             font-family: 'Calibri', sans-serif;
+            font-size: 14px;
             text-align: center;
             line-height: 1.5;
         }
@@ -85,8 +86,8 @@
 }).addTo(map);
 
         const coordinates = {
-            "Moksha": { lat: 54.320567, lng: 43.341170 },
-            "Erzya": { lat: 54.18671, lng: 45.18383 },
+            "Moksha": { lat: 54.079964, lng: 42.837425 },
+            "Erzya": { lat: 54.8419041, lng: 46.5878356 },
             "Russian": { lat: 55.7558, lng: 37.6173 },
             "Finnish": { lat: 63.2467777, lng: 25.9209164 },
             "Hungarian": { lat: 47.1817585, lng: 19.5060937 }
@@ -153,6 +154,7 @@
 
                 const labels = [
                     { name: "Erzya", value: selectedRow.erzya },
+                    { name: "Moksha", value: selectedRow.moksha },
                     { name: "Russian", value: selectedRow.russian },
                     { name: "Finnish", value: selectedRow.finnish },
                     { name: "Hungarian", value: selectedRow.hungarian }
@@ -167,32 +169,13 @@
             iconSize: [100, 30]
         });
 
-        if (label.name === "Erzya") {
-                    const mokshaValue = selectedRow.moksha;
-                    customLabel = L.divIcon({
-                        className: 'custom-label',
-                        html: `${label.value}<br>${mokshaValue}`,
-                        iconSize: [100, 50]
-                    });
-                } else {
-                    customLabel = L.divIcon({
-                        className: 'custom-label',
-                        html: label.value,
-                        iconSize: [100, 30]
-                    });
-                }
-
         var marker = L.marker([coord.lat, coord.lng], { icon: customLabel }).addTo(map);
 
         marker.bindPopup(`<strong>${label.name}</strong>`);
-        if (label.name === "Erzya") {
-            marker.bindPopup(`<strong>Erzya</strong><br><strong>Moksha</strong>`);
-        }
 
         bounds.extend(marker.getLatLng());
     }
 });
-
 
                 if (!bounds.isValid()) {
                     console.warn("No valid bounds to fit on the map.");
